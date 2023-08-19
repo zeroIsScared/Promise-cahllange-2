@@ -18,25 +18,48 @@
 // returned by the 'createImage' promise to hide the current image. You will
 // need a global variable for that 😉)
 // 7. After the second image has loaded, pause execution for 2 seconds
-const body =  document.querySelector('body');
-const img = document.createElement('img');
 
-const createImage =(path)=>{
+
+let img;
+
+const createImage = (path) => {
     return new Promise((resolve,reject)=>{       
-            
-        img.setAttribute('src', path);
-        img.addEventListener('onload', ()=>{
-            
+     img = document.createElement('img');
+        img.src = path;
+
+        img.addEventListener('load', ()=>{  
+            imgContainer.appendChild(img);          
            resolve( img);           
         })  
         
         img.addEventListener('error', ()=>{
            reject(new Error(`The image failed to load!`)); 
-        })            
+        });
+    });
+};
 
-    })
+const wait = (seconds) => {
+    return new Promise ((resolve) =>{
+        setTimeout(resolve, 1000 * seconds);
+    });
 }
 
-createImage('./img/img-1.jpg').
-then(body.appendChild(img)).
-catch((err)=>console.log(err))
+createImage('img/img-1.jpg').then(img => { 
+        console.log(`Image was loaded`);        
+    return wait(2);
+}).
+then(()=>{
+    console.log(`I waited 2 seconds`);
+    img.style.display='none';
+    return createImage('img/img-2.jpg')
+ }).
+ then(img => { 
+    console.log(`The second image was loaded`);
+    //img.style.display='block';
+    return wait(2)
+}).
+then(() =>console.log(`I waited 2 more seconds!`)).
+catch((err) => console.error(err))
+
+
+
